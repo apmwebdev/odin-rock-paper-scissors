@@ -13,59 +13,137 @@ rps.getComputerChoice = () => {
 rps.playRound = (playerMove) => {
   playerMove = playerMove.toUpperCase();
   let compMove = rps.getComputerChoice();
-  let retStr = '';
+  let result = {
+    playerMove: playerMove,
+    compMove: compMove,
+    winner: ''
+  };
   
   if (playerMove === 'ROCK') {
     if (compMove === 'ROCK') {
-      retStr = 'You tie. Rock ties Rock';
+      result.winner = 'TIE';
     } else if (compMove === 'PAPER') {
-      retStr = 'You lose! Paper beats Rock';
+      result.winner = 'COMP';
     } else {
-      retStr = 'You win! Rock beats Scissors';
+      result.winner = 'PLAYER';
     }
   } else if (playerMove === 'PAPER') {
     if (compMove === 'ROCK') {
-      retStr = 'You win! Paper beats Rock';
+      result.winner = 'PLAYER';
     } else if (compMove === 'PAPER') {
-      retStr = 'You tie. Paper ties Paper';
+      result.winner = 'TIE';
     } else {
-      retStr = 'You lose! Scissors beats Paper';
+      result.winner = 'COMP';
     }
   } else if (playerMove === 'SCISSORS') {
     if (compMove === 'ROCK') {
-      retStr = 'You lose! Rock beats Scissors';
+      result.winner = 'COMP';
     } else if (compMove === 'PAPER') {
-      retStr = 'You win! Scissors beats Paper';
+      result.winner = 'PLAYER';
     } else {
-      retStr = 'You tie. Scissors ties Scissors';
+      result.winner = 'TIE';
     }
   } else {
-    retStr = 'Invalid input';
-  }
-  return retStr;
-}
-
-rps.game = () => {
-  let playerScore = 0;
-  let compScore = 0;
-  for (let i = 0; i < 5; i++) {
-    let playerMove = prompt('What is your move?');
-    let result = rps.playRound(playerMove);
-    console.log(result);
-    if (result.slice(0, 7) === 'You win') {
-      playerScore++;
-    } else if (result.slice(0, 8) === 'You lose') {
-      compScore++
-    }
+    result.winner = 'ERROR';
   }
   
-  console.log(`Your score: ${playerScore}`);
-  console.log(`Computer score: ${compScore}`);
-  if (playerScore > compScore) {
-    console.log('You win the game!');
-  } else if (compScore > playerScore) {
-    console.log('You lose the game.');
-  } else if (playerScore === compScore) {
-    console.log('Somehow, you tied the game.');
+  return result;
+}
+
+rps.displayRoundResult = (result) => {
+  let returnStr = '';
+  if (result.winner === 'PLAYER') {
+    returnStr = `You win! ${result.playerMove} beats ${result.compMove}`;
+  } else if (result.winner === 'COMP') {
+    returnStr = `You lose. ${result.playerMove} loses to ${result.compMove}`;
+  } else if (result.winner === 'TIE') {
+    returnStr = `You tie. ${result.playerMove} ties ${result.compMove}`;
+  } else if (result.winner === 'ERROR') {
+    returnStr = 'Error: Invalid input';
+  } else {
+    returnStr = 'Unknown error';
+  }
+  
+  let para = document.createElement('p');
+  para.textContent = returnStr;
+  document.getElementById('round-results').appendChild(para);
+}
+
+rps.calculateScore = (resultStr) => {
+  if (resultStr === 'PLAYER') {
+    rps.playerScore += 1;
+  } else if (resultStr === 'COMP') {
+    rps.compScore += 1;
+  }
+  rps.updateScoreDisplay();
+}
+
+rps.updateScoreDisplay = () => {
+  document.getElementById('score').textContent = `You: ${rps.playerScore}`
+    + ` Computer: ${rps.compScore}`
+    + ` Rounds Played: ${rps.rounds}`;
+};
+
+rps.maybeDeclareWinner = () => {
+  if (rps.rounds >= 5) {
+    let returnStr = '';
+    if (rps.playerScore > rps.compScore) {
+      returnStr = 'You win the game!';
+    } else if (rps.playerScore < rps.compScore) {
+      returnStr = 'You lose the game.';
+    } else {
+      returnStr = 'You tie the game.';
+    }
+    returnStr += ' Click "Reset Game" to play again!';
+    document.getElementById('winner').textContent = returnStr;
+    rps.endGame();
   }
 }
+
+rps.endGame = () => {
+  document.getElementById('rock').disabled = true;
+  document.getElementById('paper').disabled = true;
+  document.getElementById('scissors').disabled = true;
+}
+
+rps.resetScores = () => {
+  rps.playerScore = 0;
+  rps.compScore = 0;
+  rps.rounds = 0;
+}
+
+rps.resetGame = () => {
+  rps.resetScores();
+  rps.updateScoreDisplay();
+  document.getElementById('winner').textContent = '';
+  document.getElementById('round-results').innerHTML = '';
+  document.getElementById('rock').disabled = false;
+  document.getElementById('paper').disabled = false;
+  document.getElementById('scissors').disabled = false;
+}
+
+rps.play = (playerMove) => {
+  rps.rounds++;
+  const result = rps.playRound(playerMove);
+  rps.calculateScore(result.winner);
+  rps.displayRoundResult(result);
+  rps.maybeDeclareWinner();
+}
+
+rps.init = () => {
+  rps.resetScores();
+  
+  document.querySelector('#rock').addEventListener('click',
+    () => rps.play('rock'));
+  
+  document.querySelector('#paper').addEventListener('click',
+    () => rps.play('paper'));
+  
+  document.querySelector('#scissors').addEventListener('click',
+    () =>rps.play('scissors'));
+  
+  document.getElementById('reset').addEventListener('click',
+    () => rps.resetGame());
+}
+
+rps.init();

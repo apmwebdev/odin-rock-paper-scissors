@@ -3,9 +3,17 @@
   <head>
     <meta charset="UTF-8">
     <title>Rock Paper Scissors</title>
-    <script src="./rps.js"></script>
+    <script src="./rps.js" defer></script>
   </head>
   <body>
-    <button onClick="rps.game()">Play!</button>
+    <button id="rock">Rock</button>
+    <button id="paper">Paper</button>
+    <button id="scissors">Scissors</button>
+    <button id="reset">Reset Game</button>
+    <div id="display">
+      <div id="winner"></div>
+      <div id="score"></div>
+      <div id="round-results"></div>
+    </div>
   </body>
 </html>
